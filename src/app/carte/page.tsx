@@ -87,14 +87,18 @@ export default function CartePage() {
   const fiche = selected ? ZONE_FICHES.find((f) => f.id === selected.categoryId) : null;
 
   return (
-    <div className="lg:grid lg:h-[calc(100vh-3.5rem)] lg:grid-cols-[1fr_440px] lg:overflow-hidden">
-      {/* Carte */}
+    <div className="lg:relative lg:h-[calc(100vh-3.5rem)] lg:overflow-hidden">
+      {/* Carte — plein écran sur PC */}
       <section className="relative h-[52vh] lg:h-full">
-        <AgriMap
-          zones={visibleZones}
-          selectedFid={selected?.fid ?? null}
-          onSelect={selectZone}
-        />
+        {zones.length === 0 ? (
+          <MapLoading />
+        ) : (
+          <AgriMap
+            zones={visibleZones}
+            selectedFid={selected?.fid ?? null}
+            onSelect={selectZone}
+          />
+        )}
         <div className="pointer-events-none absolute bottom-3 left-3 z-[1000] flex flex-wrap gap-1.5">
           <button
             type="button"
@@ -134,10 +138,10 @@ export default function CartePage() {
         </div>
       </section>
 
-      {/* Panneau conseils */}
+      {/* Panneau conseils — flottant sur la carte en PC, sous la carte en mobile */}
       <section
         ref={panelRef}
-        className="scroll-mt-14 border-t bg-ec-paper p-4 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:p-5"
+        className="scroll-mt-14 border-t bg-ec-paper p-4 lg:absolute lg:bottom-4 lg:right-4 lg:top-4 lg:z-[1001] lg:w-[420px] lg:overflow-y-auto lg:rounded-2xl lg:border lg:border-stone-200 lg:bg-ec-paper/95 lg:p-5 lg:shadow-2xl lg:backdrop-blur"
       >
         {selected && fiche ? (
           <div className="space-y-3">
