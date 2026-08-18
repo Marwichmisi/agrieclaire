@@ -95,19 +95,48 @@ function FocusZone({
   return null;
 }
 
-/** Désélection au clic sur une zone vide de la carte */
+/** Point-in-polygon (ray casting) sur une géométrie GeoJSON Polygon/MultiPolygon */
+function pointInGeoJson(
+  geometry: GeoJSON.Geometry,
+  lat: number,
+  lng: number
+): boolean {
+  const rings: number[][][][] =
+    geometry.type === "Polygon"
+      ? [geometry.coordinates as number[][][]]
+      : geometry.type === "MultiPolygon"
+        ? (geometry.coordinates as number[][][][])
+        : [];
+  for (const polygon of rings) {
+    let inside = false;
+    for (const ring of polygon) {
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [xi, yi] = ring[i];
+        const [xj, yj] = ring[j];
+        const intersects =
+          yi > lat !== yj > lat &&
+          lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+        if (intersects) inside = !inside;
+      }
+    }
+    if (inside) return true;
+  }
+  return false;
+}
+
+/** Clic sur la carte : sélection par hit-test, désélection si zone vide */
 function MapClickDeselect({
-  onEmptyClick,
+  onMapClick,
 }: {
-  onEmptyClick: () => void;
+  onMapClick: (latlng: L.LatLng) => void;
 }) {
   const map = useMap();
-  const handlerRef = useRef(onEmptyClick);
+  const handlerRef = useRef(onMapClick);
   useEffect(() => {
-    handlerRef.current = onEmptyClick;
-  }, [onEmptyClick]);
+    handlerRef.current = onMapClick;
+  }, [onMapClick]);
   useEffect(() => {
-    const onClick = () => handlerRef.current();
+    const onClick = (e: L.LeafletMouseEvent) => handlerRef.current(e.latlng);
     map.on("click", onClick);
     return () => {
       map.off("click", onClick);
@@ -167,8 +196,32 @@ export function AgriMap({ zones, selectedFid, onSelect }: AgriMapProps) {
       maxBounds={ORTHO_BOUNDS}
     >
       <MapClickDeselect
-        onEmptyClick={() => {
-          if (selectedFidRef.current != null) onSelectRef.current(null);
+        onMapClick={(latlng) => {
+          // Sélection par hit-test : quel polygone contient le point cliqué ?
+          // Indépendant de la livraison d'événements par polygone (fiable
+          // sur tous les appareils, tactile inclus).
+          const { lat, lng } = latlng;
+          const zones = zonesRef.current;
+          const hit = zones.find((z) => pointInGeoJson(z.geometry, lat, lng));
+          if (hit) {
+            if (selectedFidRef.current === hit.fid) {
+              onSelectRef.current(null);
+              return;
+            }
+            onSelectRef.current({
+              fid: hit.fid,
+              categorie: hit.categorie,
+              causePro: hit.causePro,
+              recomm: hit.recomm,
+              legende: hit.legende,
+              surfaceHa: hit.surfaceHa,
+              areaM2: hit.areaM2,
+              depM2: hit.depM2,
+              categoryId: hit.categoryId,
+            });
+          } else if (selectedFidRef.current != null) {
+            onSelectRef.current(null);
+          }
         }}
       />
       <FitOnLoad zones={zones} />
@@ -212,28 +265,8 @@ export function AgriMap({ zones, selectedFid, onSelect }: AgriMapProps) {
             path.getElement()?.setAttribute("data-fid", String(fid));
           });
 
-          path.on("click", (e: L.LeafletMouseEvent) => {
-            L.DomEvent.stopPropagation(e.originalEvent);
-            const zone = zonesRef.current.find((z) => z.fid === fid);
-            if (!zone) return;
-            const selected = selectedFidRef.current;
-            if (selected === fid) {
-              onSelectRef.current(null);
-              return;
-            }
-            onSelectRef.current({
-              fid: zone.fid,
-              categorie: zone.categorie,
-              causePro: zone.causePro,
-              recomm: zone.recomm,
-              legende: zone.legende,
-              surfaceHa: zone.surfaceHa,
-              areaM2: zone.areaM2,
-              depM2: zone.depM2,
-              categoryId: zone.categoryId,
-            });
-          });
-
+          // La sélection passe par le hit-test de la carte (MapClickDeselect),
+          // robuste sur tous les appareils. Ici : uniquement le survol.
           path.on("mouseover", () => {
             path.setStyle({ weight: 4 });
             path.bringToFront();
