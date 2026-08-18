@@ -124,6 +124,31 @@ function pointInGeoJson(
   return false;
 }
 
+/** Recalcule la carte quand son conteneur change de taille (ouverture du panneau, rotation) */
+function AutoInvalidateSize() {
+  const map = useMap();
+  useEffect(() => {
+    const container = map.getContainer();
+    let raf = 0;
+    let trailing: ReturnType<typeof setTimeout> | undefined;
+    const invalidate = () => map.invalidateSize();
+    const schedule = () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(trailing);
+      raf = requestAnimationFrame(invalidate);
+      trailing = setTimeout(invalidate, 400);
+    };
+    const ro = new ResizeObserver(schedule);
+    ro.observe(container);
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+      clearTimeout(trailing);
+    };
+  }, [map]);
+  return null;
+}
+
 /** Clic sur la carte : sélection par hit-test, désélection si zone vide */
 function MapClickDeselect({
   onMapClick,
@@ -226,6 +251,7 @@ export function AgriMap({ zones, selectedFid, onSelect }: AgriMapProps) {
       />
       <FitOnLoad zones={zones} />
       <FocusZone layerByFid={layerByFid} selectedFid={selectedFid} />
+      <AutoInvalidateSize />
       <ImageOverlay
         url="/maps/orthomosaique.webp"
         bounds={ORTHO_BOUNDS}

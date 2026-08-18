@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { MapPin, MousePointerClick, X, ChevronDown, ListTree } from "lucide-react";
+import { MapPin, MousePointerClick, X, ChevronDown, ChevronRight, ListTree } from "lucide-react";
 
 import { ZONE_FICHES, ZONE_BY_ID, classifyZone, type ZoneCategoryId } from "@/lib/zone-data";
 import { formatHa } from "@/lib/utils";
@@ -30,6 +30,7 @@ export default function CartePage() {
   const [zones, setZones] = useState<ZonedFeature[]>([]);
   const [selected, setSelected] = useState<ZoneClick | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [panelOpen, setPanelOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,11 +69,14 @@ export default function CartePage() {
 
   const selectZone = (zone: ZoneClick | null) => {
     setSelected(zone);
-    if (zone && window.innerWidth < 1024) {
-      // Sur mobile, faire défiler jusqu'au panneau de conseil
-      requestAnimationFrame(() => {
-        panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+    if (zone) {
+      setPanelOpen(true);
+      if (window.innerWidth < 1024) {
+        // Sur mobile, faire défiler jusqu'au panneau de conseil
+        requestAnimationFrame(() => {
+          panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
     }
   };
 
@@ -87,9 +91,14 @@ export default function CartePage() {
   const fiche = selected ? ZONE_FICHES.find((f) => f.id === selected.categoryId) : null;
 
   return (
-    <div className="lg:relative lg:h-[calc(100vh-3.5rem)] lg:overflow-hidden">
-      {/* Carte — plein écran sur PC */}
-      <section className="relative h-[52vh] lg:h-full">
+    <div className="lg:flex lg:h-[calc(100vh-3.5rem)] lg:overflow-hidden">
+      {/* Carte — pleine largeur par défaut, réduite à 60 % quand le panneau s'ouvre */}
+      <section
+        className={cn(
+          "relative h-[52vh] lg:h-full lg:shrink-0 lg:transition-[width] lg:duration-300 lg:ease-in-out",
+          panelOpen ? "lg:w-[60%]" : "lg:w-full"
+        )}
+      >
         {zones.length === 0 ? (
           <MapLoading />
         ) : (
@@ -138,12 +147,26 @@ export default function CartePage() {
         </div>
       </section>
 
-      {/* Panneau conseils — flottant sur la carte en PC, sous la carte en mobile */}
+      {/* Panneau conseils — colonne cachée par défaut, glisse à droite en poussant la carte */}
       <section
         ref={panelRef}
-        className="scroll-mt-14 border-t bg-ec-paper p-4 lg:absolute lg:bottom-4 lg:right-4 lg:top-4 lg:z-[1001] lg:w-[420px] lg:overflow-y-auto lg:rounded-2xl lg:border lg:border-stone-200 lg:bg-ec-paper/95 lg:p-5 lg:shadow-2xl lg:backdrop-blur"
+        className={cn(
+          "scroll-mt-14 border-t bg-ec-paper p-4 lg:shrink-0 lg:overflow-hidden lg:border-t-0 lg:p-0 lg:transition-[width] lg:duration-300 lg:ease-in-out",
+          panelOpen ? "lg:w-[40%] lg:border-l" : "lg:w-0"
+        )}
       >
-        {selected && fiche ? (
+        <div className="lg:h-full lg:overflow-y-auto lg:p-5">
+          <div className="mb-3 hidden justify-end lg:flex">
+            <button
+              type="button"
+              onClick={() => setPanelOpen(false)}
+              aria-label="Masquer le panneau de conseils"
+              className="flex size-7 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-500 transition-colors hover:border-ec-orange hover:text-ec-orange"
+            >
+              <ChevronRight className="size-4" aria-hidden />
+            </button>
+          </div>
+          {selected && fiche ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2 text-xs font-semibold text-muted-foreground">
               <div className="flex min-w-0 items-center gap-2">
@@ -250,6 +273,7 @@ export default function CartePage() {
               </AccordionItem>
             ))}
           </Accordion>
+        </div>
         </div>
       </section>
     </div>

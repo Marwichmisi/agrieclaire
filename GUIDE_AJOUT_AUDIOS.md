@@ -40,7 +40,7 @@ Enregistrez **les scripts suivants**, tels quels ou en les adaptant librement au
 
 ### 3.1 `zone-exces-eau.mp3` — Zones trop humides (bleu)
 
-> « Bonjour ! Votre parcelle a été survolée par un drone le 13 août 2026. Sur la carte, cette zone est colorée en bleu : c'est une zone où l'eau s'accumule après les pluies. Ici, les racines de vos plantes manquent d'oxygène, et l'engrais peut partir avec l'eau.
+> « Bonjour ! cette zone est colorée en bleu : c'est une zone où l'eau s'accumule après les pluies. Ici, les racines de vos plantes manquent d'oxygène, et l'engrais peut partir avec l'eau.
 >
 > Pour le maïs : faites attention. Quand le maïs est jeune, un sol trop gorgé d'eau peut le faire mourir en quelques jours. Plus tard, un excès d'eau au moment de la floraison peut faire baisser la récolte. Creusez des rigoles pour évacuer l'eau, et n'apportez pas d'engrais juste avant de fortes pluies.
 >

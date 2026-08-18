@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   return (
-    <div className="mx-auto max-w-6xl px-4">
+    <div className="mx-auto max-w-6xl px-4 xl:max-w-7xl">
       {/* Hero */}
       <section className="relative overflow-hidden py-14 sm:py-20">
         <div
@@ -25,53 +25,55 @@ export default function HomePage() {
               "radial-gradient(900px 400px at 85% 20%, #ffe4d1 0%, transparent 60%), radial-gradient(700px 300px at 10% 90%, #fff3e6 0%, transparent 55%)",
           }}
         />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <Badge className="mb-4 bg-ec-orange text-white">
-            ElectroChallenge 2026 · Équipe Orange
-          </Badge>
-          <h1 className="font-display text-4xl font-bold leading-tight text-balance sm:text-5xl">
-            Votre champ vu du ciel,{" "}
-            <span className="text-ec-orange">expliqué simplement</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-foreground/80">
-            Un drone survole votre parcelle, des cartes sont produites… et
-            vous, vous recevez des conseils clairs : où votre maïs manque
-            d'eau, où votre manioc risque de pourrir, où réduire l'engrais.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg">
-              <Link href="/carte">
-                Voir la carte de ma parcelle
-                <ArrowRight aria-hidden />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/pour-le-jury">
-                Les cartes sources (jury)
-              </Link>
-            </Button>
+        <div className="relative grid items-center gap-10 lg:grid-cols-[1fr_1.7fr]">
+          <div>
+            <Badge className="mb-4 bg-ec-orange text-white">
+              ElectroChallenge 2026 · Équipe Orange
+            </Badge>
+            <h1 className="font-display text-4xl font-bold leading-tight text-balance sm:text-5xl">
+              Votre champ vu du ciel,{" "}
+              <span className="text-ec-orange">expliqué simplement</span>
+            </h1>
+            <p className="mt-4 max-w-xl text-lg leading-relaxed text-foreground/80">
+              Un drone survole votre parcelle, des cartes sont produites… et
+              vous, vous recevez des conseils clairs : où votre maïs manque
+              d'eau, où votre manioc risque de pourrir, où réduire l'engrais.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link href="/carte">
+                  Voir la carte de ma parcelle
+                  <ArrowRight aria-hidden />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/pour-le-jury">
+                  Les cartes sources (jury)
+                </Link>
+              </Button>
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Parcelle « essaie » · vol du 13/08/2026 · 2,09 ha en maïs +
+              manioc
+            </p>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Parcelle « essaie » · vol du 13/08/2026 · 2,09 ha en maïs +
-            manioc
-          </p>
-        </div>
 
-        <div className="relative mx-auto mt-10 max-w-4xl">
-          <img
-            src="/maps/apercu-parcelle.jpg"
-            alt="Aperçu de la carte interactive : orthomosaïque de la parcelle avec ses zones colorées"
-            className="w-full rounded-2xl border-4 border-white shadow-xl"
-            loading="eager"
-          />
-          <div className="absolute -bottom-4 left-6 rounded-xl border bg-white p-3 shadow-lg">
-            <p className="flex items-center gap-2 text-sm font-bold text-ec-ink">
-              <MapPin className="size-4 text-ec-orange" aria-hidden />
-              16 zones analysées
-            </p>
-            <p className="text-xs text-muted-foreground">
-              4 situations différentes sur la parcelle
-            </p>
+          <div className="relative">
+            <img
+              src="/maps/apercu-parcelle.jpg"
+              alt="Aperçu de la carte interactive : orthomosaïque de la parcelle avec ses zones colorées"
+              className="w-full rounded-2xl border-4 border-white shadow-xl"
+              loading="eager"
+            />
+            <div className="absolute -bottom-4 -left-4 rounded-xl border bg-white p-3 shadow-lg">
+              <p className="flex items-center gap-2 text-sm font-bold text-ec-ink">
+                <MapPin className="size-4 text-ec-orange" aria-hidden />
+                16 zones analysées
+              </p>
+              <p className="text-xs text-muted-foreground">
+                4 situations différentes sur la parcelle
+              </p>
+            </div>
           </div>
         </div>
       </section>
